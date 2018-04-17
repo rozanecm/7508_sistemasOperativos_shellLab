@@ -1,0 +1,64 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{listingsutf8}
+\usepackage{xcolor}
+\usepackage{pdfpages}
+\usepackage{geometry}
+
+\geometry{
+    a4paper,
+    margin=1.2in
+}
+
+\title{Sistemas Operativos (75.08): Lab Shell}
+\author{Matias Rozanec (\texttt{\#97404})\\\texttt{rozanecm@gmail.com}}
+\date{Abril 2018}
+
+\begin{document}
+\maketitle
+\newpage
+
+\tableofcontents
+\newpage
+
+% *** CONSIGNA ***
+% \part{Consigna}
+% \includepdf[pages=-]{consigna.pdf}
+
+% *** RESOLUCION ***
+% Some settings for coding style
+\lstset{
+    basicstyle=\linespread{0.9}\ttfamily\footnotesize,
+    frame=single,
+    frameround=tttt,
+    numbers=left,
+    numberstyle=\tiny,
+    linewidth=14cm,
+    literate=
+      {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+      {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+      {à}{{\`a}}1 {è}{{\`e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1
+      {À}{{\`A}}1 {È}{{\'E}}1 {Ì}{{\`I}}1 {Ò}{{\`O}}1 {Ù}{{\`U}}1
+      {ä}{{\"a}}1 {ë}{{\"e}}1 {ï}{{\"i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+      {Ä}{{\"A}}1 {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+      {â}{{\^a}}1 {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1
+      {Â}{{\^A}}1 {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1
+      {œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1 {ß}{{\ss}}1
+      {ű}{{\H{u}}}1 {Ű}{{\H{U}}}1 {ő}{{\H{o}}}1 {Ő}{{\H{O}}}1
+      {ç}{{\c c}}1 {Ç}{{\c C}}1 {ø}{{\o}}1 {å}{{\r a}}1 {Å}{{\r A}}1
+      {€}{{\euro}}1 {£}{{\pounds}}1 {«}{{\guillemotleft}}1
+      {»}{{\guillemotright}}1 {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {¿}{{?`}}1
+}
+\part{Resolución}
+\section{Parte 1}
+Para resolver la primera parte de este Lab, se alteraron las líneas correspondientes al caso de ejecución de comandos en el switch de la función \texttt{void exec\_cmd(struct cmd* cmd)} del archivo \texttt{exec.c} (líneas 6 a 16 del fragmento de código recuadrado).\\
+
+Para lograr invocar programas y permitir pasarles argumentos, lo primero que se hizo fue castear el \texttt{struct cmd* cmd} a \texttt{(struct execcmd*) full\_cmd}; de esta forma logramos tener acceso de forma directa a todos los datos necesarios del comando recibido. Por último, invocamos \texttt{execvp} pasándole como primer argumento \texttt{argv[0]}, o sea el nombre del programa a ejecutar, y como segundo argumento \texttt{argv}, o sea toda la lista de argumentos.\\
+
+Para poder expandir variables de entorno, lo que primero que se hizo fue trabajar sobre la detección de las mismas. Esto se implementó leyendo el primer caracter de cada uno de los argumentos. En caso de que el caracter coincida con \texttt{\$}, se trata de una variable de entorno, por lo que se procede a su expansión mediante \texttt{getenv()}. A dicha función hay que pasarle el argumento correspondiente pero sin el caracter \texttt{\$}, por lo que antes de realizar la llamada a la función, se altera el \texttt{char *} de forma que apunte al segundo char del argumento en cuestión, quedando así el argumento listo para ser procesado por \texttt{getenv()}.
+\lstinputlisting[firstline=58, lastline=107]{../src/exec.c}
+
+\newpage
+
+\end{document}
