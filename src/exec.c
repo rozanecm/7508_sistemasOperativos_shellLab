@@ -59,13 +59,18 @@ void exec_cmd(struct cmd* cmd) {
 
 	switch (cmd->type) {
 
-		case EXEC:
+		case EXEC: {
 			// spawns a command
-			//
-			// Your code here
-			printf("Commands are not yet implemented\n");
-			_exit(-1);
+            struct execcmd* full_cmd = (struct execcmd*)cmd;
+            for(int i = 0; i < full_cmd->argc; ++i){
+                if(full_cmd->argv[i][0] == '$'){
+                    full_cmd->argv[i] = full_cmd->argv[i] + sizeof(char);
+                    full_cmd->argv[i] = getenv(full_cmd->argv[i]);
+                }
+            }
+            execvp(full_cmd->argv[0], full_cmd->argv);
 			break;
+        }
 
 		case BACK: {
 			// runs a command in background
