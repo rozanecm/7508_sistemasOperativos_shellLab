@@ -1,2 +1,5 @@
 *.o
 sh
+*.aux
+*.log
+*.toc
