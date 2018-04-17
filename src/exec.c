@@ -57,51 +57,51 @@ static int open_redir_fd(char* file) {
 // 	in types.h
 void exec_cmd(struct cmd* cmd) {
 
-	switch (cmd->type) {
+    switch (cmd->type) {
 
-		case EXEC: {
-			// spawns a command
+        case EXEC: {
+            // spawns a command
             struct execcmd* full_cmd = (struct execcmd*)cmd;
             for(int i = 0; i < full_cmd->argc; ++i){
                 if(full_cmd->argv[i][0] == '$'){
-                    full_cmd->argv[i] = full_cmd->argv[i] + sizeof(char);
+                    full_cmd->argv[i] += sizeof(char);
                     full_cmd->argv[i] = getenv(full_cmd->argv[i]);
                 }
             }
             execvp(full_cmd->argv[0], full_cmd->argv);
-			break;
+            break;
         }
 
-		case BACK: {
-			// runs a command in background
-			//
-			// Your code here
-			printf("Background process are not yet implemented\n");
-			_exit(-1);
-			break;
-		}
+        case BACK: {
+            // runs a command in background
+            //
+            // Your code here
+            printf("Background process are not yet implemented\n");
+            _exit(-1);
+            break;
+        }
 
-		case REDIR: {
-			// changes the input/output/stderr flow
-			//
-			// Your code here
-			printf("Redirections are not yet implemented\n");
-			_exit(-1);
-			break;
-		}
+        case REDIR: {
+            // changes the input/output/stderr flow
+            //
+            // Your code here
+            printf("Redirections are not yet implemented\n");
+            _exit(-1);
+            break;
+        }
 		
-		case PIPE: {
-			// pipes two commands
-			//
-			// Your code here
-			printf("Pipes are not yet implemented\n");
+        case PIPE: {
+            // pipes two commands
+            //
+            // Your code here
+            printf("Pipes are not yet implemented\n");
 				
-			// free the memory allocated
-			// for the pipe tree structure
-			free_command(parsed_pipe);
+            // free the memory allocated
+            // for the pipe tree structure
+            free_command(parsed_pipe);
 
-			break;
-		}
-	}
+            break;
+        }
+    }
 }
 
