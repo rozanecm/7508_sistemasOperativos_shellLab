@@ -56,8 +56,10 @@ Para resolver la primera parte de este Lab, se alteraron las líneas correspondi
 
 Para lograr invocar programas y permitir pasarles argumentos, lo primero que se hizo fue castear el \texttt{struct cmd* cmd} a \texttt{(struct execcmd*) full\_cmd}; de esta forma logramos tener acceso de forma directa a todos los datos necesarios del comando recibido. Por último, invocamos \texttt{execvp} pasándole como primer argumento \texttt{argv[0]}, o sea el nombre del programa a ejecutar, y como segundo argumento \texttt{argv}, o sea toda la lista de argumentos.\\
 
-Para poder expandir variables de entorno, lo que primero que se hizo fue trabajar sobre la detección de las mismas. Esto se implementó leyendo el primer caracter de cada uno de los argumentos. En caso de que el caracter coincida con \texttt{\$}, se trata de una variable de entorno, por lo que se procede a su expansión mediante \texttt{getenv()}. A dicha función hay que pasarle el argumento correspondiente pero sin el caracter \texttt{\$}, por lo que antes de realizar la llamada a la función, se altera el \texttt{char *} de forma que apunte al segundo char del argumento en cuestión, quedando así el argumento listo para ser procesado por \texttt{getenv()}.
-\lstinputlisting[firstline=58, lastline=107]{../src/exec.c}
+Para poder expandir variables de entorno, lo que primero que se hizo fue trabajar sobre la detección de las mismas. Esto se implementó leyendo el primer caracter de cada uno de los argumentos. En caso de que el caracter coincida con \texttt{\$}, se trata de una variable de entorno, por lo que se procede a su expansión mediante \texttt{getenv()}. A dicha función hay que pasarle el argumento correspondiente pero sin el caracter \texttt{\$}.
+
+\lstinputlisting[firstline=58, lastline=107,caption={exec.c}]{../src/exec.c}
+\lstinputlisting[firstline=85, lastline=109,caption={parsing.c}]{../src/parsing.c}
 
 \newpage
 

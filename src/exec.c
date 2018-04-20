@@ -62,19 +62,6 @@ void exec_cmd(struct cmd* cmd) {
         case EXEC: {
             // spawns a command
             struct execcmd* full_cmd = (struct execcmd*)cmd;
-            for(int i = 0; i < full_cmd->argc; ++i){
-                if(full_cmd->argv[i][0] == '$'){
-                    char* temp = getenv(full_cmd->argv[i]+1);
-                    char* temp_argv = realloc(full_cmd->argv[i], strlen(temp));
-                    if(temp_argv == NULL){
-                        printf("error in realloc\n.");
-                        perror("error in realloc.\n");
-                    }
-
-                    full_cmd->argv[i] = temp_argv;
-                    strcpy(full_cmd->argv[i], temp);
-                }
-            }
             execvp(full_cmd->argv[0], full_cmd->argv);
             break;
         }
