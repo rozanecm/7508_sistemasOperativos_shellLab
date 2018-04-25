@@ -3,3 +3,5 @@ sh
 *.aux
 *.log
 *.toc
+tags
+informe/code/*
