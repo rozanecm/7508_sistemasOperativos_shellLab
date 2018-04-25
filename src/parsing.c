@@ -5,7 +5,7 @@ static char* get_token(char* buf, int idx) {
 
     char* tok;
     int i;
-
+    
     tok = (char*)calloc(ARGSIZE, sizeof(char));
     i = 0;
 
@@ -36,24 +36,24 @@ static bool parse_redir_flow(struct execcmd* c, char* arg) {
                 break;
             }
         }
-
+        
         free(arg);
         c->type = REDIR;
-
+        
         return true;
     }
-
+    
     // flow redirection for input
     if ((inIdx = block_contains(arg, '<')) >= 0) {
         // stdin redir
         strcpy(c->in_file, arg + 1);
-
+        
         c->type = REDIR;
         free(arg);
-
+        
         return true;
     }
-
+    
     return false;
 }
 
@@ -70,15 +70,15 @@ static bool parse_environ_var(struct execcmd* c, char* arg) {
         // that it is not a environ var, but also
         // an argument of the program to be executed
         // (For example:
-        // 	./prog -arg=value
-        // 	./prog --arg=value
+        //  ./prog -arg=value
+        //  ./prog --arg=value
         // )
         if (block_contains(arg, '-') < 0) {
             c->eargv[c->eargc++] = arg;
             return true;
         }
     }
-
+    
     return false;
 }
 
@@ -90,12 +90,16 @@ static bool parse_environ_var(struct execcmd* c, char* arg) {
 //
 // Hints:
 // - check if the first byte of the argument
-// 	contains the '$'
+//  contains the '$'
 // - expand it and copy the value
-// 	 to 'arg' 
+//   to 'arg' 
 static char* expand_environ_var(char* arg) {
     if(arg[0] == '$'){
         char* temp = getenv(arg+1);
+        if(temp == NULL){
+            arg[0] = '\0';
+            return arg;
+        }
         char* temp_argv = realloc(arg, strlen(temp));
         if(temp_argv == NULL){
             perror("error in realloc.\n");
@@ -104,6 +108,7 @@ static char* expand_environ_var(char* arg) {
         arg = temp_argv;
         strcpy(arg, temp);
     }
+
     return arg;
 }
 
@@ -116,31 +121,31 @@ static struct cmd* parse_exec(char* buf_cmd) {
     struct execcmd* c;
     char* tok;
     int idx = 0, argc = 0;
-
+    
     c = (struct execcmd*)exec_cmd_create(buf_cmd);
-
+    
     while (buf_cmd[idx] != END_STRING) {
-
+    
         tok = get_token(buf_cmd, idx);
         idx = idx + strlen(tok);
-
+        
         if (buf_cmd[idx] != END_STRING)
             idx++;
-
-        tok = expand_environ_var(tok);
-
+        
         if (parse_redir_flow(c, tok))
             continue;
-
+        
         if (parse_environ_var(c, tok))
             continue;
-
+        
+        tok = expand_environ_var(tok);
+        
         c->argv[argc++] = tok;
     }
-
+    
     c->argv[argc] = (char*)NULL;
     c->argc = argc;
-
+    
     return (struct cmd*)c;
 }
 
@@ -153,9 +158,9 @@ static struct cmd* parse_back(char* buf_cmd) {
 
     while (buf_cmd[i] != '&')
         i++;
-
+    
     buf_cmd[i] = END_STRING;
-
+    
     e = parse_exec(buf_cmd);
 
     return back_cmd_create(e);
@@ -167,7 +172,7 @@ static struct cmd* parse_cmd(char* buf_cmd) {
 
     if (strlen(buf_cmd) == 0)
         return NULL;
-
+        
     int idx;
 
     // checks if the background symbol is after
@@ -176,21 +181,21 @@ static struct cmd* parse_cmd(char* buf_cmd) {
     if ((idx = block_contains(buf_cmd, '&')) >= 0 &&
             buf_cmd[idx - 1] != '>')
         return parse_back(buf_cmd);
-
+        
     return parse_exec(buf_cmd);
 }
 
 // parses the command line
 // looking for the pipe character '|'
 struct cmd* parse_line(char* buf) {
-
+    
     struct cmd *r, *l;
-
+    
     char* right = split_line(buf, '|');
-
+    
     l = parse_cmd(buf);
     r = parse_cmd(right);
-
+    
     return pipe_cmd_create(l, r);
 }
 
