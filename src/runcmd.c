@@ -52,6 +52,8 @@ int run_cmd(char* cmd) {
 	// 	'print_back_info()'
 	//
 	// Your code here
+    if(parsed->type == BACK)
+        return 0;
 
 	// waits for the process to finish
 	waitpid(p, &status, 0);
