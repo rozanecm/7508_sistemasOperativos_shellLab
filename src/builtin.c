@@ -1,26 +1,13 @@
 #include "builtin.h"
-
-char* split_by_space(char* cmd){
-    int i = 0;
-    
-    while(cmd[i] != ' ')
-        ++i;
-
-    cmd[i++] = '\0';
-    
-    while(cmd[i] == ' ')
-        ++i;
-
-    return &cmd[i];
-}
+#include "utils.h"
 
 // returns true if the 'exit' call
 // should be performed
 int exit_shell(char* cmd) {
+    if(strcmp(cmd, "exit") == 0)
+        exit(0);
 
-    // Your code here
-
-    return 0;
+	return 0;
 }
 
 // returns true if "chdir" was performed
@@ -34,7 +21,7 @@ int cd(char* cmd) {
     sscanf(cmd, "%s", cmd_name);
 
     if(strcmp(cmd_name, "cd") == 0) {
-        char* args = split_by_space(cmd);
+        char* args = split_line(cmd, SPACE);
 
         if (strlen(args) > 0) {
             chdir(args);
@@ -47,16 +34,19 @@ int cd(char* cmd) {
         free(current_path);
         return 1;
     }
-    
-    return 0;
+
+	return 0;
 }
 
 // returns true if 'pwd' was invoked
 // in the command line
 int pwd(char* cmd) {
+    if(strcmp(cmd, "pwd") == 0){
+        char* current_path = get_current_dir_name();
+        printf("%s\n", current_path);
+        return 1;
+    }
 
-    // Your code here
-
-    return 0;
+	return 0;
 }
 
