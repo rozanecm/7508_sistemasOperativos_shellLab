@@ -77,6 +77,7 @@ set_environ_vars(full_cmd->eargv, full_cmd->eargc);
             if((execvp(full_cmd->argv[0], full_cmd->argv)) == -1){
                 perror("Error with execvp: ");
             }
+            _exit(0);
             break;
         }
 
