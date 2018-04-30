@@ -4,3 +4,4 @@ sh
 *.log
 *.toc
 tags
+informe/code/*

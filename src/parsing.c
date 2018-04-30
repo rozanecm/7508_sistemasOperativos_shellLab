@@ -32,6 +32,8 @@ static bool parse_redir_flow(struct execcmd* c, char* arg) {
             }
             // stderr redir
             case 1: {
+                if((block_contains(arg, '&')) == 0)
+                    strcpy(c->out_file, &arg[outIdx + 1]);
                 strcpy(c->err_file, &arg[outIdx + 1]);
                 break;
             }
@@ -179,7 +181,8 @@ static struct cmd* parse_cmd(char* buf_cmd) {
     // a redir symbol, in which case
     // it does not have to run in in the 'back'
     if ((idx = block_contains(buf_cmd, '&')) >= 0 &&
-            buf_cmd[idx - 1] != '>')
+            buf_cmd[idx - 1] != '>' &&
+            buf_cmd[idx + 1] != '>')
         return parse_back(buf_cmd);
         
     return parse_exec(buf_cmd);

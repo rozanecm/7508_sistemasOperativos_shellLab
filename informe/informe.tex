@@ -51,7 +51,7 @@
       {»}{{\guillemotright}}1 {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {¿}{{?`}}1
 }
 \part{Resolución}
-\section{Parte 1}
+\section{Parte 1: Invocación de comandos}
 Para resolver la primera parte de este Lab, se alteraron las líneas correspondientes al caso de ejecución de comandos en el switch de la función \texttt{void exec\_cmd(struct cmd* cmd)} del archivo \texttt{exec.c} (líneas 6 a 16 del fragmento de código recuadrado).\\
 
 Para lograr invocar programas y permitir pasarles argumentos, lo primero que se hizo fue castear el \texttt{struct cmd* cmd} a \texttt{(struct execcmd*) full\_cmd}; de esta forma logramos tener acceso de forma directa a todos los datos necesarios del comando recibido. Por último, invocamos \texttt{execvp} pasándole como primer argumento \texttt{argv[0]}, o sea el nombre del programa a ejecutar, y como segundo argumento \texttt{argv}, o sea toda la lista de argumentos.\\
@@ -62,7 +62,7 @@ Para poder expandir variables de entorno, lo que primero que se hizo fue trabaja
 \lstinputlisting[firstline=85, lastline=109,caption={parsing.c}]{code/part1/parsing.c}
 
 \newpage
-\section{Parte 2}
+\section{Parte 2: Invocación avanzada}
 \subsection{Comandos \textit{built-in}}
 Pregunta: ¿entre cd y pwd, alguno de los dos se podría implementar sin necesidad de ser built-in? ¿por qué? ¿cuál es el motivo, entonces, de hacerlo como built-in? (para esta última pregunta pensar en los built-in como true y false)\\
 
@@ -93,4 +93,30 @@ Respondo a continuación la pregunta de la parte 1 que para la primer entrega pa
 
 \textit{Pregunta: ¿cuáles son las diferencias entre la syscall execve(2) y la familia de wrappers proporcionados por la librería estándar de C (libc) exec(3)?}\\
 La syscall recibe como argumentos el nombre de programa a ejecutar, un array de argumentos que se le pasarán al nuevo programa, y array especificando el ambiente del programa. La familia de wrappers llama internamente a la syscall, pero hacen que sea más simple el manejo de la misma, contemplando los diversos escenarios posibles.
+
+
+\newpage
+\section{Parte 3: Redirecciones}
+El esqueleto dado se encarga en su etapa de parsing de almacenar los nombres de archivo a los cuales habría que redireccionar el flujo de salida estándard y error, o de los cuales habría que tomar la entrada estándard. Gracias a eso, lo único que restaba hacer es detectar si se trataba de un comando de tipo REDIR, en cuyo caso se crea el archivo correspondiente (en caso de redireccionar salidas) o se abre el archivo solicitado para lectura. En cualquiera de los casos, se le cambia el file descriptor a estos archivos con los de las entradas y salidas estandar, mediante \texttt{dup2()}.\\
+
+En el caso de la redirección \texttt{2\textgreater\&1}, se chequea si el archivo al que se quiere redireccionar la salida de error tiene `nombre' == `\texttt{\&1}', en cuyo caso se redirecciona la salida de error a la salida std. \\
+
+\textit{Investigar el significado de este tipo de redirección y explicar qué sucede con la salida de cat out.txt. Comparar con los resultados obtenidos anteriormente.}\\
+\texttt{2\textgreater\&1} redirecciona la salida de error a la salida std. \texttt{\textgreater out.txt} redirecciona la salida std al archivo \textit{out.txt}. Por lo tanto, todo lo que saldría por la salida std y por la salida de error, se guardará en el archivo \textit{out.txt}.
+\lstinputlisting[firstline=98, lastline=138,caption={exec.c: líneas correspondientes a manejo de redirecciones.}]{code/part3/redir_exec.c}
+
+\textit{\textbf{Challenge:} investigar, describir y agregar la funcionalidad del operador de redirección $>>$ y \&\textgreater}\\
+
+El operador \texttt{$>>$} escribe en el archivo cuyo nombre le sucede a dicho operador, pero en lugar de crear un archivo nuevo y escribir desde el principio, en caso de que dicho archivo ya exista, lo abre en modo \textit{append}. \\
+
+El operador \texttt{\&\textgreater} redirige las salidas std y de error al archivo cuyo nombre le sucede al comando.
+En el código a continuación, se puede ver que en el caso de haber redireccionamiento de output, se chequea si se usó el operador \texttt{$>>$}, en cuyo caso se abre el archivo en modo append.
+\lstinputlisting[firstline=97, lastline=145,caption={exec.c: líneas correspondientes a manejo de redirecciones.}]{code/part3/comb_exec.c}
+Para la implementación del comando \texttt{\&\textgreater} hubo que corregir primero el manejo de los comandos BACK:
+\lstinputlisting[firstline=89, lastline=95,caption={exec.c: líneas corrgidas del manejo de comandos BACK.}]{code/part3/comb_exec.c}
+Luego, en el archivo \textit{parsing.c} se corrigió el código para que no se entienda como un comando BACK en caso de encontrar la secuencia \texttt{\&\textgreater}. 
+\lstinputlisting[firstline=171, lastline=189,caption={parsing.c: se agrega caso de excepción, evitando malinterpretar comandos como BACK.}]{code/part3/parsing.c}
+Por último, en \texttt{parse\_redir\_flow()} de \textit{parsing.c} se consideró el caso de que se quiera redireccionar las salidas std y de error a un archivo (adentro del \texttt{case: 1}).
+    \lstinputlisting[firstline=20, lastline=60,caption={parsing.c: de detectrse la secuencia \&\textgreater, se guarda el nombre de archivo tanto para la salida std como de error.}]{code/part3/parsing.c}
+
 \end{document}
