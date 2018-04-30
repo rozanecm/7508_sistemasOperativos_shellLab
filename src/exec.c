@@ -1,5 +1,10 @@
 #include "exec.h"
 #define _BSD_SOURCE || _POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600
+/* following includes/defines are used by dup */
+#define _GNU_SOURCE             /* See feature_test_macros(7) */
+#include <fcntl.h>              /* Obtain O_* constant definitions */
+#include <unistd.h>
+/**********************************************/
 
 // sets the "key" argument with the key part of
 // the "arg" argument and null-terminates it
@@ -72,12 +77,12 @@ set_environ_vars(full_cmd->eargv, full_cmd->eargc);
         case EXEC:{
             // spawns a command
             if(full_cmd->argv[0] == NULL){
-                exit(0);
+                exit(-1);
             }
             if((execvp(full_cmd->argv[0], full_cmd->argv)) == -1){
                 perror("Error with execvp: ");
             }
-            _exit(0);
+            _exit(-1);
             break;
         }
 
@@ -86,15 +91,48 @@ set_environ_vars(full_cmd->eargv, full_cmd->eargc);
             if((execvp(full_cmd->argv[0], full_cmd->argv)) == -1){
                 perror("Error with execvp: ");
             }
-    
+            _exit(-1);
             break;
         }
 
         case REDIR: {
             // changes the input/output/stderr flow
-            //
-            // Your code here
-            printf("Redirections are not yet implemented\n");
+            int in_fd, out_fd, err_fd;
+            if(strlen(full_cmd->in_file)){
+                in_fd = open(full_cmd->in_file, O_RDONLY);
+                if(in_fd == -1)
+                    perror("error changing fd");
+                if(dup2(in_fd, STDIN_FILENO) == -1)
+                    perror("error in dup2");
+            }
+
+            if(strlen(full_cmd->out_file)){
+                out_fd = open(full_cmd->out_file, O_CREAT | O_WRONLY, 
+                        S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
+                if(out_fd == -1)
+                    perror("error changing fd");
+                if(dup2(out_fd, STDOUT_FILENO) == -1)
+                    perror("error in dup2");
+                close(out_fd);
+            }
+
+            if(strlen(full_cmd->err_file)){
+                if(strcmp(full_cmd->err_file, "&1") == 0){
+                    err_fd = 1;
+                }else{
+                    err_fd = open(full_cmd->err_file, O_CREAT | O_WRONLY, 
+                            S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
+                }
+                if(err_fd == -1)
+                    perror("error changing out fd");
+                if(dup2(err_fd, STDERR_FILENO) == -1)
+                    perror("erro in dup2");
+            }
+
+            if((execvp(full_cmd->argv[0], full_cmd->argv)) == -1){
+                perror("Error with execvp: ");
+            }
+ 
             _exit(-1);
             break;
         }
