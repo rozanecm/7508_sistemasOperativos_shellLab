@@ -146,10 +146,34 @@ set_environ_vars(full_cmd->eargv, full_cmd->eargc);
         
         case PIPE: {
             // pipes two commands
-            //
-            // Your code here
-            printf("Pipes are not yet implemented\n");
-                
+            struct pipecmd* pipe_cmd = (struct pipecmd*) cmd;
+            int pipefd[2];
+            if(pipe(pipefd) == -1)
+               perror("error with pipe(2)");
+
+            pid_t cpid = fork();
+            if (cpid == -1) { 
+                perror("fork");
+                exit(EXIT_FAILURE); 
+            }
+
+            if (cpid == 0) {
+                close(pipefd[0]);
+               
+                if((dup2(pipefd[1], STDOUT_FILENO)) == -1) 
+                    perror("error on dup2");
+             
+                exec_cmd(pipe_cmd->leftcmd);
+
+            } else { 
+                close(pipefd[1]);
+
+                if((dup2(pipefd[0], STDIN_FILENO)) == -1) 
+                    perror("error on dup2");
+           
+                exec_cmd(pipe_cmd->rightcmd);
+            }
+
             // free the memory allocated
             // for the pipe tree structure
             free_command(parsed_pipe);
