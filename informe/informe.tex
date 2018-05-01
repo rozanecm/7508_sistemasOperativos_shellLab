@@ -97,6 +97,7 @@ La syscall recibe como argumentos el nombre de programa a ejecutar, un array de 
 
 \newpage
 \section{Parte 3: Redirecciones}
+\subsection{Flujo estándar}
 El esqueleto dado se encarga en su etapa de parsing de almacenar los nombres de archivo a los cuales habría que redireccionar el flujo de salida estándard y error, o de los cuales habría que tomar la entrada estándard. Gracias a eso, lo único que restaba hacer es detectar si se trataba de un comando de tipo REDIR, en cuyo caso se crea el archivo correspondiente (en caso de redireccionar salidas) o se abre el archivo solicitado para lectura. En cualquiera de los casos, se le cambia el file descriptor a estos archivos con los de las entradas y salidas estandar, mediante \texttt{dup2()}.\\
 
 En el caso de la redirección \texttt{2\textgreater\&1}, se chequea si el archivo al que se quiere redireccionar la salida de error tiene `nombre' == `\texttt{\&1}', en cuyo caso se redirecciona la salida de error a la salida std. \\
@@ -117,6 +118,10 @@ Para la implementación del comando \texttt{\&\textgreater} hubo que corregir pr
 Luego, en el archivo \textit{parsing.c} se corrigió el código para que no se entienda como un comando BACK en caso de encontrar la secuencia \texttt{\&\textgreater}. 
 \lstinputlisting[firstline=171, lastline=189,caption={parsing.c: se agrega caso de excepción, evitando malinterpretar comandos como BACK.}]{code/part3/parsing.c}
 Por último, en \texttt{parse\_redir\_flow()} de \textit{parsing.c} se consideró el caso de que se quiera redireccionar las salidas std y de error a un archivo (adentro del \texttt{case: 1}).
-    \lstinputlisting[firstline=20, lastline=60,caption={parsing.c: de detectrse la secuencia \&\textgreater, se guarda el nombre de archivo tanto para la salida std como de error.}]{code/part3/parsing.c}
+\lstinputlisting[firstline=20, lastline=60,caption={parsing.c: de detectrse la secuencia \&\textgreater, se guarda el nombre de archivo tanto para la salida std como de error.}]{code/part3/parsing.c}
+
+\subsection{Tuberías simples (pipes)}
+En este caso se completó el código correspondiente al caso de PIPE en la función \textit{exec\_cmd} del archivo \textit{exec.c}. En primer lugar se llama a \texttt{pipe()} para obtener dos file descriptors. A continuación, se hace un fork: el proceso hijo redirecciona el stdout al segundo file descriptor dado por \texttt{pipe()}, y luego llama a \textit{exec\_cmd()} con el comando de la izquierda del pipe. El roceso padre redirecciona el stdin al primer file descriptor dado por \texttt{pipe()} y llama a \textit{exec\_cmd} con el comando de la derecha del pipe.
+\lstinputlisting[firstline=147, lastline=188,caption={exec.c: PIPE case}]{code/part3/pipe_exec.c}
 
 \end{document}
