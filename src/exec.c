@@ -69,13 +69,13 @@ static int open_redir_fd(char* file) {
 // - check how the 'cmd' structs are defined
 //  in types.h
 void exec_cmd(struct cmd* cmd) {
-struct execcmd* full_cmd = (struct execcmd*) cmd;
-set_environ_vars(full_cmd->eargv, full_cmd->eargc);
-
     switch (cmd->type) {
 
         case EXEC:{
-            // spawns a command
+            // spawns a command 
+            struct execcmd* full_cmd = (struct execcmd*) cmd; 
+            set_environ_vars(full_cmd->eargv, full_cmd->eargc);
+
             if(full_cmd->argv[0] == NULL){
                 exit(-1);
             }
@@ -94,7 +94,10 @@ set_environ_vars(full_cmd->eargv, full_cmd->eargc);
             break;
         }
 
-        case REDIR: {
+        case REDIR: { 
+            struct execcmd* full_cmd = (struct execcmd*) cmd; 
+            set_environ_vars(full_cmd->eargv, full_cmd->eargc);
+
             // changes the input/output/stderr flow
             int in_fd, out_fd, err_fd;
             /* IN redir */
