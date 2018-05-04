@@ -5,6 +5,7 @@
 \usepackage{xcolor}
 \usepackage{pdfpages}
 \usepackage{geometry}
+\usepackage{hyperref}
 
 \geometry{
     a4paper,
@@ -124,4 +125,19 @@ Por último, en \texttt{parse\_redir\_flow()} de \textit{parsing.c} se consider�
 En este caso se completó el código correspondiente al caso de PIPE en la función \textit{exec\_cmd} del archivo \textit{exec.c}. En primer lugar se llama a \texttt{pipe()} para obtener dos file descriptors. A continuación, se hace un fork: el proceso hijo redirecciona el stdout al segundo file descriptor dado por \texttt{pipe()}, y luego llama a \textit{exec\_cmd()} con el comando de la izquierda del pipe. El roceso padre redirecciona el stdin al primer file descriptor dado por \texttt{pipe()} y llama a \textit{exec\_cmd} con el comando de la derecha del pipe.
 \lstinputlisting[firstline=147, lastline=188,caption={exec.c: PIPE case}]{code/part3/pipe_exec.c}
 
+\newpage
+\section{Challenges promocionales}
+\subsection{Pseudo-variables}
+Para implementar el correcto funcionamiento de la pseudo variable \texttt{?}, se hizo llegar el status number hasta la expansión de variables, donde de tener que expandir la variable \texttt{?}, se la expande poniendo en su lugar el \textit{exit status of the most recently executed foreground pipeline}. Para que el status le llegue a la función correspondiente, fue necesario pasarlo a la función \texttt{parse\_line()}, que se lo pasa a \texttt{parse\_cmd()}, que se lo pasa a \texttt{parse\_back()} y \texttt{parse\_exec()}, y esta última se lo pasa finalmente a \texttt{expand\_environ\_var()}.
+
+\lstinputlisting[firstline=98, lastline=123,caption={parsing.c: modificación de exapnsión de variables.}]{code/challenges/parsing.c}
+
+\textit{Investigar al menos otras dos variables mágicas estándar, y describir su propósito.}\\
+
+Una lista completa de las variables mágicas estándar y sus propósitos se pueden encontrar en el \href{https://www.gnu.org/software/bash/manual/html\_node/Variable-Index.html}{Bash reference manual.} Se presentan a continuación dos de ellas, según solicitado.\\
+
+\begin{description}
+    \item[\$] Expande al process ID de la shell. En una () subshell, expande al process ID de la shell invocante, no de la subshell.
+    \item[0] Expande al nombre de la shell o shell script. Esto es un set en el momento de la inicialización de la shell. Si Bash es invocado con un archivo de comandos, \$ es seteado al onmbre de ese archivo. Si Bash es ejecutado con la opción \texttt{-c}, \$ es seteado al primer argumento después del string a ejecutar, si hay alguno presente. De lo contrario, es seteado al filename usado para invocar Bash, dado por el argumento cero.
+\end{description}
 \end{document}
