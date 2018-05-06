@@ -140,4 +140,10 @@ Una lista completa de las variables mágicas estándar y sus propósitos se pued
     \item[\$] Expande al process ID de la shell. En una () subshell, expande al process ID de la shell invocante, no de la subshell.
     \item[0] Expande al nombre de la shell o shell script. Esto es un set en el momento de la inicialización de la shell. Si Bash es invocado con un archivo de comandos, \$ es seteado al onmbre de ese archivo. Si Bash es ejecutado con la opción \texttt{-c}, \$ es seteado al primer argumento después del string a ejecutar, si hay alguno presente. De lo contrario, es seteado al filename usado para invocar Bash, dado por el argumento cero.
 \end{description}
+
+\subsection{Tuberías múltiples}
+Para implementar las tuberías múltiples, se chequea al momento de parsear un comando si el mismo contiene un caracater pipe, en cuyo caso se retorna lo que retorne \texttt{parse\_line(comando derecho de pipe)}. Nótese que esta implementación permite agregar la cantidad de pipes que uno desee sin inconvenientes.
+
+\lstinputlisting[firstline=179, lastline=200,caption={parsing.c: ver lineas 8 y 9.}]{code/challenges/pipe_parsing.c}
+
 \end{document}
