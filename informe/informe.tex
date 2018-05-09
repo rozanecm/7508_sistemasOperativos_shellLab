@@ -146,4 +146,9 @@ Para implementar las tuberías múltiples, se chequea al momento de parsear un c
 
 \lstinputlisting[firstline=179, lastline=200,caption={parsing.c: ver lineas 8 y 9.}]{code/challenges/pipe_parsing.c}
 
+\subsection{Segundo plano avanzado}
+La clave para resolver este challenge fue el manejo de señales. Cada vez que un proceso termina, sea naturalmente o por interrupción, éste lanza la señal \texttt{SIGCHLD}. Mediante la función  \texttt{sigaction()} se llama a una función \texttt{handler()} antes de escribir nuevamente el \textit{prompt} cada vez que se recibe una señal de ese tipo, para poder dar el mensaje de proceso terminado. Como este comportamiento es desado únicamente cuando se termina de ejecutar un proceso \textit{background}, se discriminó cada caso chequeando el \textit{pid} del proceso terminante. Esto se logra guardando el \textit{pid} del background process en ejecución, y comparándolo con el pid guardado en la señal. 
+
+\lstinputlisting[caption={sh.c: ver lineas 9 a 14 y 22 a 25.}]{code/challenges/background/sh.c}
+\lstinputlisting[firstline=47, lastline=62,caption={runcmd.c: en caso de tratarse de un background process, se asigna el pid a la variable global \texttt{background\_process\_id.}}]{code/challenges/background/runcmd.c}
 \end{document}

@@ -3,4 +3,5 @@ sh
 *.aux
 *.log
 *.toc
+*.out
 tags
